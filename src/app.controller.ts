@@ -1,6 +1,8 @@
-import { Controller, Delete, Get, Post, Put,Param,Body, HttpCode } from '@nestjs/common';
+import { Controller, Delete, Get, Post, Put,Param,Body, HttpCode,ParseIntPipe,ParseUUIDPipe, ParseEnumPipe } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Data, ReportType, data } from './data';
+import { CreateReportDto,ReportResponseDto,UpdateReportDto } from './dtos/report.dto';
+
 
 
 @Controller('report/:type')
@@ -8,11 +10,11 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get('')
-  getAllIncomeReports(@Param('type') type:ReportType) {
+  getAllIncomeReports(@Param('type',new ParseEnumPipe(ReportType)) type:string):ReportResponseDto[] {
 
-    // let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
+    let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
     
-    return this.appService.getAllIncomeReports(type)
+    return this.appService.getAllIncomeReports(reportType)
   }
 
   @Get('hello')
@@ -20,15 +22,19 @@ export class AppController {
     return {};
   }
   @Get(':id')
-  getIncomeReportById(@Param('type' )type:ReportType, @Param('id') id:string):{} {
-    // let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
+  getIncomeReportById(@Param('type', new ParseEnumPipe(ReportType))type:string, @Param('id',ParseUUIDPipe) id:string): ReportResponseDto{
+
+    console.log(id, typeof id)
+    let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
     // let response = data.report.filter((data)=>data.type===reportType).find((data)=>data.id===id)
     // console.log({response})
-    return this.appService.getIncomeReportById(type,id)
+    return this.appService.getIncomeReportById(reportType,id)
   }
 
   @Post()
-  createReport( @Body() body:{amount:number,source:string}, @Param('type') type:ReportType){
+  createReport( @Body() body: CreateReportDto, @Param('type',new ParseEnumPipe(ReportType)) type:string){
+
+    let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
     // let newReport = {
     //   id:uuid(),
     //   source:source,
@@ -41,12 +47,12 @@ export class AppController {
     // data.report.push(newReport)
 
     // console.log()
-    return this.appService.createReport(body,type)
+    return this.appService.createReport(body,reportType)
   }
 
   @Put(':id')
-  updateReport(@Body() body:{amount:number,source:string},@Param('type') type:ReportType, @Param('id') id:string){
-    // let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
+  updateReport(@Body() body: UpdateReportDto,@Param('type',new ParseEnumPipe(ReportType)) type:string, @Param('id',ParseUUIDPipe) id:string){
+    let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
     // let response = data.report.filter((data)=>data.type===reportType).find((data)=>data.id===id)
     
 
@@ -77,14 +83,14 @@ export class AppController {
 
     //   return {}
     // }
-    return this.appService.updateReport(body,type,id)
+    return this.appService.updateReport(body,reportType,id)
     
   }
 
   @HttpCode(204)
   @Delete(':id')
-  deleteReport(@Param('type') type:ReportType , @Param('id') id:string){
-    // let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
+  deleteReport(@Param('type',new ParseEnumPipe(ReportType)) type:string , @Param('id',ParseUUIDPipe) id:string){
+    let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
     // let responseIndex = data.report.findIndex((data)=>data.id===id)
     // console.log({responseIndex})
 
@@ -93,7 +99,7 @@ export class AppController {
     //   return  `Deleted Id: ${id}`
     // }
 
-    return this.appService.deleteReport(type,id)
+    return this.appService.deleteReport(reportType,id)
     
   }
 }

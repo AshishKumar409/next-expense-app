@@ -7,7 +7,7 @@ export interface Data {
             amount: number,
             createdAt: Date,
             updatedAt: Date,
-            type: "income" | "expense"
+            type: ReportType
         }[]
     
 }

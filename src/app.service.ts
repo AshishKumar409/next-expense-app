@@ -1,23 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { ReportType, data } from './data';
 import {v4 as uuid} from 'uuid'
+import { ReportResponseDto } from './dtos/report.dto';
 
 interface ReportedData{amount:number,source:string}
+interface UpdateReportedData{amount?:number,source?:string}
 
 @Injectable()
 export class AppService {
 
-  getAllIncomeReports(type:ReportType){
-    let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
+  getAllIncomeReports(type:ReportType):ReportResponseDto[]{
+    // let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
     
-    return data.report.filter((data)=>data.type===reportType)
+    return data.report.filter((data)=>data.type===type).map((report)=>new ReportResponseDto(report))
   }
 
-  getIncomeReportById(type:ReportType,id:string){
-    let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
-    let response = data.report.filter((data)=>data.type===reportType).find((data)=>data.id===id)
+  getIncomeReportById(type:ReportType,id:string):ReportResponseDto{
+    // let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
+    let response = data.report.filter((data)=>data.type===type).find((data)=>data.id===id)
     console.log({response})
-    return response?response:{}
+
+
+    return response?new ReportResponseDto(response):undefined
   }
 
   createReport(body:ReportedData,type:ReportType){
@@ -28,19 +32,19 @@ export class AppService {
       amount:amount,
       createdAt:new Date(),
       updatedAt:new Date(),
-      type:type==="income"?ReportType.INCOME:ReportType.EXPENSE
+      type
     }
 
     data.report.push(newReport)
 
 
-    return newReport
+    return new ReportResponseDto(newReport)
   }
 
-  updateReport(body:ReportedData,type:ReportType,id:string){
+  updateReport(body:UpdateReportedData,type:ReportType,id:string){
     let {source,amount} = body
-    let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
-    let response = data.report.filter((data)=>data.type===reportType).find((data)=>data.id===id)
+    // let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
+    let response = data.report.filter((data)=>data.type===type).find((data)=>data.id===id)
     
 
 
@@ -63,7 +67,7 @@ export class AppService {
 
       console.log({data})
 
-      return data.report.find((data)=>data.id===id)
+      return new ReportResponseDto(data.report.find((data)=>data.id===id))
 
       
     }else{
@@ -74,7 +78,7 @@ export class AppService {
 
 
   deleteReport(type:ReportType,id:string){
-    let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
+    // let reportType = type==="income"?ReportType.INCOME:ReportType.EXPENSE
     let responseIndex = data.report.findIndex((data)=>data.id===id)
     console.log({responseIndex})
 
